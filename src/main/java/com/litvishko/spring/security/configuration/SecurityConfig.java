@@ -1,13 +1,14 @@
 package com.litvishko.spring.security.configuration;
 
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.User.UserBuilder;
 
 @EnableWebSecurity
-public class SecurityUsers extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         UserBuilder userBuilder = User.withDefaultPasswordEncoder();
@@ -15,5 +16,13 @@ public class SecurityUsers extends WebSecurityConfigurerAdapter {
                 .withUser(userBuilder.username("daniil").password("daniil").roles("EMPLOYEE"))
                 .withUser(userBuilder.username("vlad").password("vlad").roles("HR"))
                 .withUser(userBuilder.username("misha").password("misha").roles("MANAGER", "HR"));
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests().antMatchers("/").hasAnyRole("EMPLOYEE", "HR", "MANAGER")
+        .antMatchers("/hrOnly").hasRole("HR")
+        .antMatchers("/managerOnly").hasRole("MANAGER")
+                .and().formLogin().permitAll();
     }
 }
